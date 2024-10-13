@@ -1,0 +1,3 @@
+[submodule "distill/ext/dinov2"]
+	path = distill/ext/dinov2
+	url = https://github.com/facebookresearch/dinov2.git
