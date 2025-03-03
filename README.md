@@ -17,4 +17,5 @@ TODO：
 克隆仓库与子仓：
 ```
 git clone --recursive git@github.com:GauthierLi/distilling_framework.git 
+python setup.py develop
 ```
