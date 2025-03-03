@@ -1,11 +1,12 @@
 import torch
 import torch.nn as nn
+from base_model import BaseModel
 
-from typing import Sequence
+from typing import Sequence, Literal
 from distill.loger import gaulog
 from distill.common import ConvBnAct, LightResBlock
 
-class LightClsBackbone(nn.Module):
+class LightClsBackbone(BaseModel):
     stage_names = ['down_sample', 'stage1', 'stage2', 'stage3']
     stage_conv_params = {
         'down_sample': dict(kernel_size=9, stride=8),
@@ -20,9 +21,10 @@ class LightClsBackbone(nn.Module):
         cat_dim=0,
         in_channels=3,
         widths=[32, 64, 128, 256],
+        model_structure: Literal['cnn', 'transformer']="cnn",
         init_cfg=None,
     ):
-        super().__init__()
+        super().__init__(model_structure=model_structure)
         self.cat_dim = cat_dim
         self.wid_stages = widths
 
@@ -66,4 +68,5 @@ if __name__ == "__main__":
     model = LightClsBackbone().to("cuda")
     gaulog.debug(model)
     out = model(x)
+    gaulog.info("Out shape: " +  str(len(out)) + f",\nshape 1: , {out[0].shape}, \nshape -1: {out[-1].shape}")
     import pdb; pdb.set_trace()
