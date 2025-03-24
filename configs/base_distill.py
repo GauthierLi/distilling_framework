@@ -3,12 +3,12 @@ import distill
 
 from torch import optim
 from torchvision import transforms
-from distill.data.dataloader import PlayAndDebugDataset
+from distill.data.dataloader import PlayAndDebugDataloader
 from distill.loss import DistillLoss
 from distill.models.structure import DistillModel
 from distill.models.backbone import Dinov2Backbone, LightClsBackbone
 
-dataset = PlayAndDebugDataset(
+dataloader = PlayAndDebugDataloader(
     generate_img_size = (960, 576),
     transforms = [transforms.ToTensor()]
 )
