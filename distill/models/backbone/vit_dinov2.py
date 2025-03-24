@@ -3,7 +3,7 @@ import torch
 
 from torch import nn
 from typing import List
-from base_model import BaseModel
+from .base_model import BaseModel
 
 class Dinov2Backbone(BaseModel):
     """ 
@@ -26,5 +26,4 @@ if __name__ == "__main__":
     with torch.no_grad():
         x = torch.rand((1, 3, 588, 966)).to('cuda')
         model = Dinov2Backbone().to('cuda')
-        import pdb; pdb.set_trace()
         result = model(x) # get intermedia
