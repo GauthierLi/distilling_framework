@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from base_model import BaseModel
+from .base_model import BaseModel
 
 from typing import Sequence, Literal
 from distill.loger import gaulog
