@@ -24,6 +24,19 @@ class BaseDataset(Dataset):
     def _parse_data(self, data: Any):
         raise NotImplementedError
 
+    def _to_device(self, data: Any, device: str):
+        if isinstance(data, dict):
+            for key in data:
+                data[key] = data[key].to(device)
+        elif isinstance(data, list):
+            for i in range(len(data)):
+                data[i] = data[i].to(device)
+        elif isinstance(data, torch.Tensor):
+            data = data.to(device)
+        else:
+            raise NotImplementedError(f"{type(data)} should be custom reimplemente")
+        return data
+
     def process_data(self, idx: int):
         data_meta = self.data_info[idx]
         data = self._parse_data(data_meta)
