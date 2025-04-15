@@ -3,13 +3,17 @@ import distill
 
 from torch import optim
 from torchvision import transforms
-from distill.data.dataloader import PlayAndDebugDataloader
 from distill.loss import DistillLoss
+from distill.trainer import BaseTrainer
+from distill.data.dataloader import PlayAndDebugDataloader
 from distill.models.structure import DistillModel
 from distill.models.backbone import Dinov2Backbone, LightClsBackbone
 
 dataloader = PlayAndDebugDataloader(
-    generate_img_size = (960, 576),
+    generate_img_size = {
+        "teacher": (966, 588),
+        "student": (960, 576)
+    },
     transforms = [transforms.ToTensor()]
 )
 
@@ -47,8 +51,15 @@ optimizer = optim.AdamW(
     lr=1e-3, 
     weight_decay=1e-2
 )
+scheduler = optim.lr_scheduler.StepLR(
+    optimizer=optimizer,
+    step_size=10,
+    gamma=0.1
+)
 
 trainer = dict(
+    type=BaseTrainer,
+    device="cuda",
     epochs=100,
     save_period=1,
     monitor="off",

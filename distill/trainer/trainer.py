@@ -1,7 +1,8 @@
 import torch 
 
-from typing import Dict, Any
-from distill.utils import gaulog
+from tqdm import tqdm 
+from typing import Dict, Any, Iterable
+from distill.loger import gaulog
 
 class BaseTrainer(object):
     def __init__(self,
@@ -12,7 +13,8 @@ class BaseTrainer(object):
                  loss: torch.nn.Module,
                  structure: torch.nn.Module,
                  scheduler=None,
-                 ):
+                 dataloader: Iterable[Any]=None,
+                 *args, **kwargs) -> None:
         self.epochs = epochs
         self.device = device
         self.models = models
@@ -20,7 +22,7 @@ class BaseTrainer(object):
         self.loss = loss
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.distill_structure = None
+        self.dataloader = dataloader
 
         self._init_structure()
         self._init_device()
@@ -29,15 +31,20 @@ class BaseTrainer(object):
         self.models['teacher']['model'].to(self.device)
         self.models['student']['model'].to(self.device)
         self.distill_structure.to(self.device)
-        gaulog.info("Models are loaded to device: ", self.device)
+        gaulog.info("Models are loaded to device: " + self.device)
 
     def _init_structure(self):
         self.distill_structure = self.structure(
             self.models['teacher'],
             self.models['student'],
-            self.loss,
             self.optimizer,
+            self.loss,
         )
 
     def train(self):
-        ...
+        for data in tqdm(self.dataloader, desc="Training", total=len(self.dataloader)):
+            data = self.dataloader.dataset._to_device(data, self.device)
+            loss = self.distill_structure.forward(data, mode="train")
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()

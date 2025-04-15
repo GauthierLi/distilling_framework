@@ -13,29 +13,38 @@ class BaseStructure(nn.Module):
                  loss: nn.Module,
                  *args,
                  **kwargs) -> None:
+        super().__init__(*args, **kwargs)
         self.teacher_model = teacher["model"]
         self.student_model = student["model"]
         self.teacher_layers = teacher["teacher_out_layers"]
         self.student_layers = student["student_out_layers"]
         self.loss = loss
         self.optimizer = optimizer
-        super().__init__(*args, **kwargs)
 
     def _train_step(self, x, *args, **kwargs):
         output = self._forward(x)
-        student_out = output['student']["out"]
-        teacher_out = output['teacher']["out"]
+        loss = self.loss(output)
+        return loss
 
     @abstractmethod
     def _val_step(self, data: dict, *args, **kwargs):
         raise NotImplementedError
 
-    def _forward(self, x, *args, **kwargs):
+    def _forward(self, data, *args, **kwargs):
         # teacher out
+        teacher_in = data
+        student_in = data
+        if isinstance(data, dict):
+            teacher_in = data['teacher']
+            student_in = data['student']
+        if isinstance(data, list):
+            teacher_in = data[0]
+            student_in = data[1]
+
         with torch.no_grad():
-            teacher_out = self.teacher_model(x)
+            teacher_out = self.teacher_model(teacher_in)
         # student out
-        student_out = self.student_model(x)
+        student_out = self.student_model(student_in)
         t_out = []
         s_out = []
 
@@ -56,7 +65,7 @@ class BaseStructure(nn.Module):
         return output
 
     def forward(self,
-                data: dict,
+                data: torch.Tensor,
                 mode: Literal["train", "val", "norm"],
                 *args, **kwargs):
         if mode == "train":
