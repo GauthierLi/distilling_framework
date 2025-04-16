@@ -30,6 +30,13 @@ class BaseTrainer(object):
     def _init_device(self):
         self.models['teacher']['model'].to(self.device)
         self.models['student']['model'].to(self.device)
+        for head in \
+            self.models['teacher']["teacher_out_layers"]["heads"]:
+            head.to(self.device)
+
+        for head in \
+            self.models['student']["student_out_layers"]["heads"]:
+            head.to(self.device)
         self.distill_structure.to(self.device)
         gaulog.info("Models are loaded to device: " + self.device)
 
@@ -37,7 +44,6 @@ class BaseTrainer(object):
         self.distill_structure = self.structure(
             self.models['teacher'],
             self.models['student'],
-            self.optimizer,
             self.loss,
         )
 

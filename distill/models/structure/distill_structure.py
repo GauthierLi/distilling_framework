@@ -9,8 +9,7 @@ class DistillModel(BaseStructure):
     def __init__(self,
                  teacher: dict,
                  student: dict,
-                 optimizer: Optimizer,
                  loss: nn.Module):
-        super(DistillModel, self).__init__(teacher, student, optimizer, loss)
+        super(DistillModel, self).__init__(teacher, student, loss)
 
 

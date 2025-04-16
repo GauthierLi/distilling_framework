@@ -4,12 +4,12 @@ from torch import nn
 from typing import Literal
 from torch.optim import Optimizer
 from abc import abstractmethod, ABCMeta
+from distill.utils import batch_call
 
 class BaseStructure(nn.Module):
     def __init__(self,
                  teacher: dict,
                  student: dict,
-                 optimizer: Optimizer,
                  loss: nn.Module,
                  *args,
                  **kwargs) -> None:
@@ -19,7 +19,6 @@ class BaseStructure(nn.Module):
         self.teacher_layers = teacher["teacher_out_layers"]
         self.student_layers = student["student_out_layers"]
         self.loss = loss
-        self.optimizer = optimizer
 
     def _train_step(self, x, *args, **kwargs):
         output = self._forward(x)
@@ -27,7 +26,7 @@ class BaseStructure(nn.Module):
         return loss
 
     @abstractmethod
-    def _val_step(self, data: dict, *args, **kwargs):
+    def _val_step(self, data, *args, **kwargs):
         raise NotImplementedError
 
     def _forward(self, data, *args, **kwargs):
@@ -45,19 +44,32 @@ class BaseStructure(nn.Module):
             teacher_out = self.teacher_model(teacher_in)
         # student out
         student_out = self.student_model(student_in)
-        t_out = []
-        s_out = []
+        t_feat_out = []
+        s_feat_out = []
 
         for i, feat in enumerate(teacher_out):
             if i in self.teacher_layers['indices']:
-                t_out.append(feat)
+                t_feat_out.append(feat)
 
         for i, feat in enumerate(student_out):
             if i in self.student_layers['indices']:
-                s_out.append(feat)
+                s_feat_out.append(feat)
+
+        t_out = batch_call(
+            self.teacher_layers['heads'],
+            [[f] for f in t_feat_out]
+        )
+
+        s_out = batch_call(
+            self.student_layers['heads'],
+            [[f] for f in s_feat_out]
+        )
 
         self.teacher_layers['out'] = t_out
         self.student_layers['out'] = s_out
+
+        self.teacher_layers['feats'] = t_out
+        self.student_layers['feats'] = s_out
         output = dict(
             teacher=self.teacher_layers,
             student=self.student_layers

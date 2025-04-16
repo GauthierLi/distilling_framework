@@ -28,8 +28,8 @@ class VitHead(nn.Module):
         self.input_dim =input_shape 
         self.output_dim = output_dim
         self.intermediate_single_dim = intermediate_single_dim
-        self.fc1 = nn.Linear(input_shape[0], intermediate_single_dim)
-        self.fc2 = nn.Linear(input_shape[1], intermediate_single_dim)
+        self.fc1 = nn.Linear(input_shape[1], intermediate_single_dim)
+        self.fc2 = nn.Linear(input_shape[0], intermediate_single_dim)
         self.fc = nn.Sequential(
             nn.Linear(intermediate_single_dim**2, 1024),
             nn.Dropout(0.5),
@@ -117,9 +117,13 @@ models = {
 loss = DistillLoss()
 distill_structure = DistillModel
 optimizer = optim.AdamW(
-    params=models["student"]["model"].parameters(),
-    lr=1e-3, 
-    weight_decay=1e-2
+    [dict(params=models["student"]["model"].parameters())] +
+    [dict(params=m.parameters(), lr=1e-4) for m \
+            in models["student"]["student_out_layers"]["heads"]] +
+    [dict(params=m.parameters(), lr=1e-4) for m \
+            in models["teacher"]["teacher_out_layers"]["heads"]] ,
+    lr=1e-3,
+    weight_decay=1e-2,
 )
 scheduler = optim.lr_scheduler.StepLR(
     optimizer=optimizer,
