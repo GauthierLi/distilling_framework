@@ -7,11 +7,17 @@ TODO：
 
     - [x] 3. loger
 
-    - [] 4. framework
+    - [x] 4. framework
 
     - [x] 5. loss 
 
     - [] 6. 训练代码
+
+    -[] 7. tensorboard记录
+
+    -[] 8. validation 
+
+    -[] 9. resume && save
 
 # quick start 
 克隆仓库与子仓：
