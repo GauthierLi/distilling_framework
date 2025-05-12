@@ -11,13 +11,13 @@ TODO：
 
     - [x] 5. loss 
 
-    - [] 6. 训练代码
+    - [x] 6. 训练代码
 
-    -[] 7. tensorboard记录
+    - [] 7. tensorboard记录
 
-    -[] 8. validation 
+    - [] 8. validation 
 
-    -[] 9. resume && save
+    - [] 9. resume && save
 
 # quick start 
 克隆仓库与子仓：

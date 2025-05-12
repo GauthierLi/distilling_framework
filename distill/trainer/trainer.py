@@ -1,8 +1,9 @@
 import torch 
 
 from tqdm import tqdm 
-from typing import Dict, Any, Iterable
 from distill.loger import gaulog
+from distill.utils import make_save_dir
+from typing import Dict, Any, Iterable, List, Tuple
 
 class BaseTrainer(object):
     def __init__(self,
@@ -14,6 +15,8 @@ class BaseTrainer(object):
                  structure: torch.nn.Module,
                  scheduler=None,
                  dataloader: Iterable[Any]=None,
+                 validate_period: int=0,
+                 save_dir: str="workdirs/output",
                  *args, **kwargs) -> None:
         self.epochs = epochs
         self.device = device
@@ -23,6 +26,9 @@ class BaseTrainer(object):
         self.optimizer = optimizer
         self.scheduler = scheduler
         self.dataloader = dataloader
+        self.save_dir = save_dir
+        self.validate_period = validate_period
+        make_save_dir(save_dir)
 
         self._init_structure()
         self._init_device()
@@ -47,10 +53,26 @@ class BaseTrainer(object):
             self.loss,
         )
 
-    def train(self):
+    def train_one_epochs(self):
         for data in tqdm(self.dataloader, desc="Training", total=len(self.dataloader)):
             data = self.dataloader.dataset._to_device(data, self.device)
             loss = self.distill_structure.forward(data, mode="train")
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
+
+    def validate_one_epochs(self):
+        ...
+
+    def train(self):
+        gaulog.info("Start training...")
+        for epoch in range(self.epochs):
+            gaulog.info(f"Epoch {epoch + 1}/{self.epochs}")
+            self.train_one_epochs()
+            if self.scheduler is not None:
+                self.scheduler.step()
+            if self.validate_period > 0 and (epoch + 1) % self.validate_period == 0:
+                gaulog.info("Validating...")
+                self.validate_one_epochs()
+            gaulog.info(f"Epoch {epoch + 1} finished.")
+        gaulog.info("Training finished.")

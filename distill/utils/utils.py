@@ -17,3 +17,17 @@ def batch_call(a: List[Callable], b: List[List[Any]]) -> List[Any]:
         results.append(res)
     return results
 
+def make_save_dir(dir: str) -> None:
+    """
+        Create a directory if it does not exist
+
+        dir: str: Directory to be created
+    """
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    ckpt_dir = os.path.join(dir, "ckpt")
+    log_dir = os.path.join(dir, "logs")
+    if not os.path.exists(ckpt_dir):
+        os.makedirs(ckpt_dir)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)

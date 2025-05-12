@@ -74,6 +74,8 @@ def get_trainer(config):
         structure=config.distill_structure,
         scheduler=scheduler,
         dataloader=dataloader,
+        validate_period=config.trainer["validate_period"],
+        save_dir=config.trainer["save_dir"],
     )
     return trainer
 
