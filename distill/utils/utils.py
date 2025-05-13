@@ -1,4 +1,5 @@
 import os 
+from distill.loger import gaulog
 from typing import List, Dict, Any, Callable
 
 def batch_call(a: List[Callable], b: List[List[Any]]) -> List[Any]:
@@ -24,7 +25,12 @@ def make_save_dir(dir: str) -> None:
         dir: str: Directory to be created
     """
     if not os.path.exists(dir):
+        gaulog.info("Creating directory: " + dir)
         os.makedirs(dir)
+    else:
+        raise FileExistsError(
+            f"Directory {dir} already exists. Please choose a different directory."
+        )
     ckpt_dir = os.path.join(dir, "ckpt")
     log_dir = os.path.join(dir, "logs")
     if not os.path.exists(ckpt_dir):

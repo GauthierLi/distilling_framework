@@ -140,8 +140,9 @@ trainer = dict(
     early_stop=-1,
     validate_period=1,
     resume = False,
-    save_dir = "workdirs/" + f"{models['teacher']}-{models['student']}-distilling",
-    log_dir = os.path.join("workdirs/" + f"{models['teacher']}-{models['student']}-distilling", "logs")
+    max_saved = 3,
+    save_dir = "workdirs/" + 
+        f"{models['teacher']['model'].__class__.__name__}-{models['student']['model'].__class__.__name__}-distilling",
 )
 
 if __name__ == "__main__":

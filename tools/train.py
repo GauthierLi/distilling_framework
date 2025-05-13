@@ -76,12 +76,15 @@ def get_trainer(config):
         dataloader=dataloader,
         validate_period=config.trainer["validate_period"],
         save_dir=config.trainer["save_dir"],
+        max_saved=config.trainer["max_saved"],
     )
     return trainer
 
 
 def main(args: argparse.Namespace):
     config = parse_config(args.configs)
+    if args.workdir:
+        config.trainer["save_dir"] = args.workdir
     all_components = dir(config)
     assert_all(all_components)
     trainer = get_trainer(config)
